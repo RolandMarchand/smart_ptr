@@ -33,12 +33,12 @@ inline static void sp__smart_ptr_make_unique(struct sp__smart_ptr **owner, size_
 	struct sp__smart_ptr *ptr = *owner;
 	if (ptr == NULL) {
 		fprintf(stderr, "%s:%s():%d: uninitialize pointer, cannot make unique\n", file, func, line);
-		exit(EXIT_FAILURE);
+		abort();
 	}
 	static struct sp__smart_ptr zero;
 	if (memcmp(ptr, &zero, sizeof(struct sp__smart_ptr)) != 0) {
 		fprintf(stderr, "%s:%s():%d: pointer '%p' is not empty, cannot make unique\n", file, func, line, ptr);
-		exit(EXIT_FAILURE);
+		abort();
 	}
 	*ptr = (struct sp__smart_ptr){
 		.owner = owner,
@@ -53,11 +53,11 @@ inline static void sp__smart_ptr_set(struct sp__smart_ptr **owner, void *data, c
 	struct sp__smart_ptr *ptr = *owner;
 	if (ptr == NULL) {
 		fprintf(stderr, "%s:%s():%d: uninitialize pointer, cannot set value\n", file, func, line);
-		exit(EXIT_FAILURE);
+		abort();
 	}
 	if (ptr->owner != owner) {
 		fprintf(stderr, "%s:%s():%d: invalid ownership of '%p', cannot set value\n", file, func, line, ptr);
-		exit(EXIT_FAILURE);
+		abort();
 	}
 	memcpy(ptr->data, data, ptr->size);
 }
@@ -68,11 +68,11 @@ inline static void sp__smart_ptr_get(struct sp__smart_ptr **owner, void *data, c
 	struct sp__smart_ptr *ptr = *owner;
 	if (ptr == NULL) {
 		fprintf(stderr, "%s:%s():%d: uninitialize pointer, cannot retrieve value\n", file, func, line);
-		exit(EXIT_FAILURE);
+		abort();
 	}
 	if (ptr->owner != owner) {
 		fprintf(stderr, "%s:%s():%d: invalid ownership of '%p', cannot retrieve value\n", file, func, line, ptr);
-		exit(EXIT_FAILURE);
+		abort();
 	}
 	memcpy(data, ptr->data, ptr->size);
 }
@@ -84,11 +84,11 @@ inline static void sp__smart_ptr_free(struct sp__smart_ptr **owner, const char *
 	struct sp__smart_ptr *ptr = *owner;
 	if (ptr == NULL) {
 		fprintf(stderr, "%s:%s():%d: pointer is already freed, cannot free\n", file, func, line);
-		exit(EXIT_FAILURE);
+		abort();
 	}
 	if (ptr->owner != owner) {
 		fprintf(stderr, "%s:%s():%d: invalid ownership of '%p', cannot free\n", file, func, line, ptr);
-		exit(EXIT_FAILURE);
+		abort();
 	}
 	free(ptr->data);
 	free(ptr);
@@ -102,11 +102,11 @@ inline static struct sp__smart_ptr *sp__smart_ptr_throw(struct sp__smart_ptr **o
 	struct sp__smart_ptr *ptr = *owner;
 	if (ptr == NULL) {
 		fprintf(stderr, "%s:%s():%d: uninitialize pointer, cannot throw\n", file, func, line);
-		exit(EXIT_FAILURE);
+		abort();
 	}
 	if (ptr->owner != owner) {
 		fprintf(stderr, "%s:%s():%d: invalid ownership of '%p', cannot throw\n", file, func, line, ptr);
-		exit(EXIT_FAILURE);
+		abort();
 	}
 	ptr->owner = NULL;
 	return *owner;
@@ -119,11 +119,11 @@ inline static void sp__smart_ptr_catch(struct sp__smart_ptr **owner, const char 
 	struct sp__smart_ptr *ptr = *owner;
 	if (ptr == NULL) {
 		fprintf(stderr, "%s:%s():%d: uninitialize pointer, cannot catch\n", file, func, line);
-		exit(EXIT_FAILURE);
+		abort();
 	}
 	if (ptr->owner != NULL) {
 		fprintf(stderr, "%s:%s():%d: invalid ownership of '%p', cannot catch\n", file, func, line, ptr);
-		exit(EXIT_FAILURE);
+		abort();
 	}
 	ptr->owner = owner;
 }
