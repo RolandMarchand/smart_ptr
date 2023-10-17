@@ -6,10 +6,11 @@
 
 #define smart_ptr_make_unique(...) sp__smart_ptr_make_unique(__VA_ARGS__, __FILE__, __func__, __LINE__)
 #define smart_ptr_set(...) sp__smart_ptr_set(__VA_ARGS__, __FILE__, __func__, __LINE__)
-#define smart_ptr_catch(...) sp__smart_ptr_catch(__VA_ARGS__, __FILE__, __func__, __LINE__)
-#define smart_ptr_throw(...) sp__smart_ptr_throw(__VA_ARGS__, __FILE__, __func__, __LINE__)
-#define smart_ptr_free(...) sp__smart_ptr_free(__VA_ARGS__, __FILE__, __func__, __LINE__)
 #define smart_ptr_get(...) sp__smart_ptr_get(__VA_ARGS__, __FILE__, __func__, __LINE__)
+#define smart_ptr_resize(...) sp__smart_ptr_resize(__VA_ARGS__, __FILE__, __func__, __LINE__)
+#define smart_ptr_free(...) sp__smart_ptr_free(__VA_ARGS__, __FILE__, __func__, __LINE__)
+#define smart_ptr_throw(...) sp__smart_ptr_throw(__VA_ARGS__, __FILE__, __func__, __LINE__)
+#define smart_ptr_catch(...) sp__smart_ptr_catch(__VA_ARGS__, __FILE__, __func__, __LINE__)
 
 typedef struct sp__smart_ptr *smart_ptr;
 
@@ -75,6 +76,23 @@ inline static void sp__smart_ptr_get(struct sp__smart_ptr **owner, void *data, c
 		abort();
 	}
 	memcpy(data, ptr->data, ptr->size);
+}
+
+/* Change the size of the memory block pointed to by ptr to size bytes
+ * Behave similarly to realloc */
+inline static void sp__smart_ptr_resize(struct sp__smart_ptr **owner, size_t size, const char *file, const char *func, int line)
+{
+	struct sp__smart_ptr *ptr = *owner;
+	if (ptr == NULL) {
+		fprintf(stderr, "%s:%s():%d: uninitialize pointer, cannot retrieve value\n", file, func, line);
+		abort();
+	}
+	if (ptr->owner != owner) {
+		fprintf(stderr, "%s:%s():%d: invalid ownership of '%p', cannot retrieve value\n", file, func, line, ptr);
+		abort();
+	}
+	ptr->size = size;
+	ptr->data = realloc(ptr->data, ptr->size);
 }
 
 /* Unbind the pointer and free its data

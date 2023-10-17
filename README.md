@@ -41,6 +41,8 @@ The Smart Pointer library offers the following functions:
 
 `void smart_ptr_catch(smart_ptr *ptr)`: Catch thrown smart pointers and bind them to a new unique pointer. Generally used at the beginning and outside of functions to catch thrown pointers.
 
+`void smart_ptr_resize(smart_ptr *ptr, size_t size)`: Change the size of the memory block pointed to by ptr to size bytes.
+
 ## Example
 ```c
 #include "smart_ptr.h"
@@ -52,23 +54,31 @@ void print_value(smart_ptr p)
 
 	int i;
 	if (p->size < sizeof(int)) {
+		/* End of function, release ownership */
+		smart_ptr_throw(&p);
 		return;
 	}
 
 	/* Write the data held by `p` to `i` */
 	smart_ptr_get(&p, &i);
-	smart_ptr_throw(&p);
 	printf("%d\n", i);
+
+
+	/* End of function, release ownership */
+	smart_ptr_throw(&p);
 }
 
 int main()
 {
 	/* Fill `p` with an empty pointer */
 	smart_ptr p = smart_ptr_init();
-	
+
 	/* Allocate and bind the memory to `p` */
-	smart_ptr_make_unique(&p, sizeof(int));
-	
+	smart_ptr_make_unique(&p, sizeof(char));
+
+	/* Reallocate the data with size of int */
+	smart_ptr_resize(&p, sizeof(int));
+
 	/* Write to the memory of `p` */
 	smart_ptr_set(&p, (int[]){1});
 
@@ -80,7 +90,7 @@ int main()
 
 	/* Don't forget to free the memory */
 	smart_ptr_free(&p);
-	
+
 	return 0;
 }
 ```
